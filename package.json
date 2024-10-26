@@ -1,0 +1,7 @@
+{
+  "name": "BlogVerse",
+  "version": "1.0.0",
+  "description": "This is an social media application",
+  "main": "index.js",
+  "license": "MIT"
+}
