@@ -2,9 +2,10 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const cookiesParser = require('cookie-parser')
 const api = require('./routes/api')
 const app = express();
-
+app.use(cookiesParser());
 app.use(cors());
 // app.use(cors({
 //   origin: 'http://localhost:3000',
