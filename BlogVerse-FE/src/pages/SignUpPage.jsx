@@ -2,37 +2,49 @@ import { motion } from 'framer-motion'
 import Input from '../components/Input'
 import { User, Mail, Lock } from 'lucide-react'
 import { useState } from 'react'
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import PasswordStrengthMeter from '../components/PasswordStrengthMeter'
+import { useAuthStore } from '../store/AuthStore'
 const SignUpPage = () => {
   const [name, setName] = useState('')
   const [mail, setMail] = useState('')
   const [pass, setPassword] = useState('')
-  const handleSignUp = (e) => {
+
+  const navigate = useNavigate();
+
+  const { signup, error } = useAuthStore();
+  const handleSignUp = async (e) => {
     e.preventDefault();
+
+    try {
+      await signup(mail, pass, name);
+      navigate("/verify-email")
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
-    <session className='lg:w-full m-40 flex justify-center max-xl:flex-col max-lg:gap-5 max-lg:w-full' >
+    <div className='lg:w-full m-40 flex justify-center max-xl:flex-col max-lg:gap-5 max-lg:w-full' >
       <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className='w-2/4 bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden mr-8 flex items-center justify-center max-lg:w-full'  
-    >
-      <div className='p-8' >
-        <h2 className='text-6xl font-bold mb-6 text-center bg-gradient-to-r
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className='w-2/4 bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden mr-8 flex items-center justify-center max-lg:w-full'
+      >
+        <div className='p-8' >
+          <h2 className='text-6xl font-bold mb-6 text-center bg-gradient-to-r
          from-gray-800 to-sky-100 text-transparent bg-clip-text p-5'>
-          BlogVerse
-        </h2>
-        <p className='text-3xl font-medium- mb-6 text-center bg-gradient-to-r
+            BlogVerse
+          </h2>
+          <p className='text-3xl font-medium- mb-6 text-center bg-gradient-to-r
          from-slate-300 to-sky-300 text-transparent bg-clip-text p-5'>
-          This is where we connected, helps you connect and share with the people in your life.
-        </p>
-        
-      </div>
-    </motion.div>
-    
+            This is where we connected, helps you connect and share with the people in your life.
+          </p>
+
+        </div>
+      </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -68,6 +80,8 @@ const SignUpPage = () => {
               value={pass}
               onChange={(e) => setPassword(e.target.value)}
             />
+
+            {error && <p className='text-red-500 font-semibold mt-2'>{error}</p>}
             <PasswordStrengthMeter password={pass} />
 
             <motion.button className='mt-5 w-full py-3 px-4 bg-gradient-to-r from-slate-600 to-sky-600 text-white font-blod rounded-lg shadow-lg
@@ -91,7 +105,7 @@ const SignUpPage = () => {
         </div>
       </motion.div>
 
-    </session>
+    </div>
 
 
 
