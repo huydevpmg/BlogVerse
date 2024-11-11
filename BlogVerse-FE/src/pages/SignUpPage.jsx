@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
 import { useAuthStore } from "../store/AuthStore";
 import FloatingShape from "./../components/FloatingShape";
+
 const SignUpPage = () => {
   const [name, setName] = useState("");
   const [mail, setMail] = useState("");
