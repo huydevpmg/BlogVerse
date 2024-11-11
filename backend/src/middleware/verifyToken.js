@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const User = require("../models/user.model");
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
     return res
@@ -15,8 +15,10 @@ const verifyToken = (req, res, next) => {
     if (!decoded)
       return res
         .status(401)
-        .json({ success: false, message: "Unauthorized - no token provided" });
-    req.userId = decoded.userId;
+        .json({ success: false, message: "Unauthorized - invalid token" });
+
+    const user = await User.findById(decoded.userId).select("-password");
+    req.user = user;
     next();
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
