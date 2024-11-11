@@ -11,10 +11,10 @@ const {
 } = require("../mailtrap/emails");
 
 const signup = async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, gender } = req.body;
 
   try {
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !gender) {
       throw new Error("All fields are required");
     }
 
@@ -29,15 +29,19 @@ const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = generateVerificationCode();
 
+    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${name}`;
+    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${name}`;
+
     const user = new User({
       email,
       password: hashedPassword,
       name,
+      gender,
+      profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
       verificationToken,
       verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
     });
 
-    console.log(user);
     await user.save();
 
     // jwt
@@ -195,7 +199,7 @@ const logout = async (req, res) => {
 
 const checkAuth = async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = req.user;
     if (!user) {
       return res
         .status(400)
@@ -204,6 +208,7 @@ const checkAuth = async (req, res) => {
 
     res.status(200).json({ success: true, user });
   } catch (error) {
+    console.log("Error in checkAuth ", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };

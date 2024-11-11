@@ -5,10 +5,12 @@ const {
   FORGOT_PASSWORD_EMAIL,
   RESET_PASSWORD_SUCCESSFULLY_EMAIL
 } = require("./emailTemplate.js");
+
+//adjust config
 const sendVerificationEmail = async (email, verificationToken) => {
   const recipients = [
     {
-      email
+      email: "huy.pmg16@gmail.com"
     }
   ];
 
@@ -26,10 +28,10 @@ const sendVerificationEmail = async (email, verificationToken) => {
   }
 };
 
-const sendWelcomeEmail = async (email, userName) => {
+const sendWelcomeEmail = async (userName) => {
   const recipients = [
     {
-      email
+      email: "huy.pmg16@gmail.com"
     }
   ];
 

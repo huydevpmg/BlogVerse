@@ -1,9 +1,9 @@
-const http = require('http');
+const http = require("http");
 
-require('dotenv').config();
+require("dotenv").config();
 const { mongoConnect } = require("./db/mongo");
 
-const app = require('./app');
+const app = require("./app");
 
 const PORT = process.env.PORT || 8000;
 
