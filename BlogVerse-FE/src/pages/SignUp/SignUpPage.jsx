@@ -1,25 +1,31 @@
 import { motion } from "framer-motion";
-import Input from "../components/Input";
-import { User, Mail, Lock } from "lucide-react";
+import Input from "../../components/Input";
+import { User, Mail, Lock, PersonStanding } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import PasswordStrengthMeter from "../components/PasswordStrengthMeter";
-import { useAuthStore } from "../store/AuthStore";
-import FloatingShape from "./../components/FloatingShape";
-
+import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
+import { useAuthStore } from "../../store/AuthStore";
+import Select from "../../components/Select"; // Import the Select component
+import AuthLayout from "../../components/AuthLayout/AuthLayout";
 const SignUpPage = () => {
   const [name, setName] = useState("");
   const [mail, setMail] = useState("");
   const [pass, setPassword] = useState("");
+  const [gender, setGender] = useState(""); // State for the selected gender
 
   const navigate = useNavigate();
+  const [strength, setStrength] = useState(0);
 
   const { signup, error } = useAuthStore();
+  const handleStrengthChange = (strength) => {
+    setStrength(strength);
+  };
+
   const handleSignUp = async (e) => {
     e.preventDefault();
 
     try {
-      await signup(mail, pass, name);
+      await signup(mail, pass, name, gender);
       navigate("/verify-email");
     } catch (error) {
       console.log(error);
@@ -27,28 +33,7 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-blue-900 to-teal-900">
-      <FloatingShape
-        color="bg-cyan-300"
-        size="w-64 h-64"
-        top="-10%"
-        left="10%"
-        delay={0}
-      />
-      <FloatingShape
-        color="bg-blue-500"
-        size="w-64 h-64"
-        top="70%"
-        left="80%"
-        delay={1}
-      />
-      <FloatingShape
-        color="bg-teal-500"
-        size="w-64 h-64"
-        top="20%"
-        left="30%"
-        delay={2}
-      />
+    <AuthLayout>
       <div className="m-10 flex justify-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -85,7 +70,6 @@ const SignUpPage = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-
               <Input
                 icon={Mail}
                 type="text"
@@ -93,7 +77,6 @@ const SignUpPage = () => {
                 value={mail}
                 onChange={(e) => setMail(e.target.value)}
               />
-
               <Input
                 icon={Lock}
                 type="password"
@@ -101,20 +84,26 @@ const SignUpPage = () => {
                 value={pass}
                 onChange={(e) => setPassword(e.target.value)}
               />
-
+              <Select
+                icon={PersonStanding}
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              />{" "}
               {error && (
                 <p className="mt-2 font-semibold text-red-500">{error}</p>
               )}
-              <PasswordStrengthMeter password={pass} />
-
+              <PasswordStrengthMeter
+                password={pass}
+                onStrengthChange={handleStrengthChange}
+              />
               <motion.button
+                disabled={strength < 4}
                 className="font-blod focus:ring-offset-2f mt-5 w-full rounded-lg bg-gradient-to-r from-slate-600 to-sky-600 px-4 py-3 text-white shadow-lg transition duration-200 ease-in-out hover:from-slate-700 hover:to-sky-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-gray-600"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 Sign Up
               </motion.button>
-
               <div className="flex justify-center bg-gray-800 bg-opacity-50 px-8 py-4">
                 <p className="text-sm text-gray-500">
                   Already have account?{" "}
@@ -130,7 +119,7 @@ const SignUpPage = () => {
           </div>
         </motion.div>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

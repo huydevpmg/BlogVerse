@@ -29,7 +29,7 @@ const PasswordCriteria = ({ password }) => {
   );
 };
 
-const PasswordStrengthMeter = ({ password }) => {
+const PasswordStrengthMeter = ({ password, onStrengthChange }) => {
   const getStrength = (pass) => {
     let strength = 0;
     if (pass.length >= 6) strength++;
@@ -55,6 +55,8 @@ const PasswordStrengthMeter = ({ password }) => {
     if (strength === 3) return "Good";
     return "Strong";
   };
+
+  onStrengthChange(strength);
 
   return (
     <div className="mt-2">

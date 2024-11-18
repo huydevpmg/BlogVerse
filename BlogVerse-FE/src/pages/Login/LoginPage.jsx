@@ -2,10 +2,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
-import Input from "../components/Input";
-import { useAuthStore } from "../store/AuthStore";
-import FloatingShape from "./../components/FloatingShape";
-
+import Input from "./../../components/Input";
+import { useAuthStore } from "./../../store/AuthStore";
+import AuthLayout from "./../../components/AuthLayout/AuthLayout";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,28 +17,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-blue-900 to-teal-900">
-      <FloatingShape
-        color="bg-cyan-300"
-        size="w-64 h-64"
-        top="-10%"
-        left="10%"
-        delay={0}
-      />
-      <FloatingShape
-        color="bg-blue-500"
-        size="w-64 h-64"
-        top="70%"
-        left="80%"
-        delay={2}
-      />
-      <FloatingShape
-        color="bg-teal-500"
-        size="w-64 h-64"
-        top="20%"
-        left="30%"
-        delay={2}
-      />
+    <AuthLayout>
       <div className="m-40 flex justify-center max-xl:flex-col max-lg:w-full max-lg:gap-5 lg:w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -110,7 +88,7 @@ const LoginPage = () => {
           </div>
         </motion.div>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 export default LoginPage;

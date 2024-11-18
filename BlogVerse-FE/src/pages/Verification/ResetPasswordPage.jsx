@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useAuthStore } from "../store/AuthStore";
+import { useAuthStore } from "../../store/AuthStore";
 import { useNavigate, useParams } from "react-router-dom";
-import Input from "../components/Input";
+import Input from "../../components/Input";
 import { Lock } from "lucide-react";
 import toast from "react-hot-toast";
-import FloatingShape from "./../components/FloatingShape";
+import AuthLayout from "./../../components/AuthLayout/AuthLayout";
 
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState("");
@@ -38,28 +38,7 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 via-blue-900 to-teal-900">
-      <FloatingShape
-        color="bg-cyan-300"
-        size="w-64 h-64"
-        top="-10%"
-        left="10%"
-        delay={0}
-      />
-      <FloatingShape
-        color="bg-blue-500"
-        size="w-64 h-64"
-        top="70%"
-        left="80%"
-        delay={2}
-      />
-      <FloatingShape
-        color="bg-teal-500"
-        size="w-64 h-64"
-        top="20%"
-        left="30%"
-        delay={2}
-      />
+    <AuthLayout>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -104,7 +83,7 @@ const ResetPasswordPage = () => {
           </form>
         </div>
       </motion.div>
-    </div>
+    </AuthLayout>
   );
 };
 export default ResetPasswordPage;
