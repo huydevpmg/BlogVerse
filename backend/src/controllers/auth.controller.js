@@ -65,7 +65,7 @@ const signup = async (req, res) => {
 };
 const verifyEmail = async (req, res) => {
   const { code } = req.body;
-
+  console.log(code);
   try {
     const user = await User.findOne({
       verificationToken: code,

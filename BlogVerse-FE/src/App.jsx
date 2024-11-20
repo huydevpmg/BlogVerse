@@ -2,14 +2,14 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import SignUpPage from "./pages/SignUp/SignUpPage";
 import LoginPage from "./pages/Login/LoginPage";
-import { Toaster } from "./../node_modules/react-hot-toast/src/components/toaster";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/AuthStore";
-import DashboardPage from "./pages/Dashboard/DashboardPage";
+// import DashboardPage from "./pages/Dashboard/DashboardPage";
 import EmailVerificationPage from "./pages/Verification/EmailVerificationPage";
 import ForgotPasswordPage from "./pages/Verification/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/Verification/ResetPasswordPage";
 import HomePage from "./pages/Home/HomePage";
+import { Toaster } from "react-hot-toast";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuthStore();
@@ -43,12 +43,23 @@ function App() {
 
   return (
     <div>
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#333",
+            color: "#fff",
+          },
+        }}
+      />
+
       <Routes>
         <Route
           path="/"
           element={
             <ProtectedRoute>
-              <DashboardPage />
+              <HomePage />
             </ProtectedRoute>
           }
         />
@@ -87,12 +98,10 @@ function App() {
           }
         />
 
-        <Route path="/home-test" element={<HomePage />} />
+        {/* <Route path="/home-test" element={<HomePage />} /> */}
         {/* catch all routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
-      <Toaster />
     </div>
   );
 }

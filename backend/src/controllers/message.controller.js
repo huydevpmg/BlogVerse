@@ -1,13 +1,13 @@
 const Conversation = require("../models/conversation.model.js");
 const Message = require("../models/message.model.js");
+const { getReceiverSocketId, io } = require("../socket/socket.js");
 const sendMessage = async (req, res) => {
   try {
     const { message } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id.toString();
-    console.log("Sender ID ", senderId, " and Receiver ID ", receiverId);
 
-    const conversation = await Conversation.findOne({
+    let conversation = await Conversation.findOne({
       //find include all these fields
       participants: { $all: [senderId, receiverId] }
     });
@@ -17,8 +17,6 @@ const sendMessage = async (req, res) => {
         participants: [senderId, receiverId]
       });
     }
-
-    console.log(message);
 
     const newMessage = new Message({
       senderId,
@@ -30,11 +28,13 @@ const sendMessage = async (req, res) => {
       conversation.messages.push(newMessage._id);
     }
 
-    Promise.all([conversation.save(), newMessage.save()]);
-    // OPtimize by using Promise.all
-    // await conversation.save();
-    // await newMessage.save();
+    await Promise.all([conversation.save(), newMessage.save()]);
 
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    console.log("Receiver Socket ID: ", receiverSocketId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
     res.status(201).json({ message: "Message send successfully", newMessage });
   } catch (error) {
     console.log("Error in sendMessage controller ", error.message);
@@ -51,13 +51,15 @@ const getMessage = async (req, res) => {
       participants: { $all: [senderId, userChatToId] }
     }).populate("messages"); // NOT REFERENCE BUT ACTUAL MESSAGES
 
-    if (!conversation) res.status(200).json([]);
+    if (!conversation) {
+      return res.status(200).json([]); // Trả về phản hồi ngay lập tức nếu không tìm thấy cuộc trò chuyện
+    }
 
-    const message = conversation.messages;
+    const messages = conversation.messages;
 
-    res.status(200).json(message);
+    res.status(200).json(messages);
   } catch (error) {
-    console.log("Error in sendMessage controller ", error.message);
+    console.log("Error in getMessage controller ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

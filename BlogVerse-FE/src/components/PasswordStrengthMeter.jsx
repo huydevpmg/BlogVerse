@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Check, X } from "lucide-react";
+import { useEffect } from "react";
 
 const PasswordCriteria = ({ password }) => {
   const criteria = [
@@ -56,7 +57,10 @@ const PasswordStrengthMeter = ({ password, onStrengthChange }) => {
     return "Strong";
   };
 
-  onStrengthChange(strength);
+  useEffect(() => {
+    const strength = getStrength(password);
+    onStrengthChange(strength);
+  }, [password, onStrengthChange]);
 
   return (
     <div className="mt-2">

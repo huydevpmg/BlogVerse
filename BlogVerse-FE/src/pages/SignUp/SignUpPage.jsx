@@ -5,13 +5,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
 import { useAuthStore } from "../../store/AuthStore";
-import Select from "../../components/Select"; // Import the Select component
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
+import Select from "./../../components/Select";
 const SignUpPage = () => {
   const [name, setName] = useState("");
   const [mail, setMail] = useState("");
   const [pass, setPassword] = useState("");
-  const [gender, setGender] = useState(""); // State for the selected gender
+  const [gender, setGender] = useState("");
 
   const navigate = useNavigate();
   const [strength, setStrength] = useState(0);
@@ -88,7 +88,7 @@ const SignUpPage = () => {
                 icon={PersonStanding}
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-              />{" "}
+              />
               {error && (
                 <p className="mt-2 font-semibold text-red-500">{error}</p>
               )}
