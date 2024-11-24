@@ -3,8 +3,6 @@
 ### Tech using: Reactjs, Nodejs, MongoDB, ExpressJS
 
 ## Installation
-
-### Backend
 ```bash
 git clone https://github.com/huydevpmg/BlogVerse.git
 
@@ -26,12 +24,10 @@ yarn add
 # NODE_ENV=development
 # MAILTRAP_TOKEN=your_mailtrap_token
 # CLIENT_URL= http://localhost:5173
+#CLOUDINARY_CLOUD_NAME=
+#CLOUDINARY_API_KEY=
+#CLOUDINARY_API_SECRET=
 
 #Run
 yarn start
-```
-
-### Frontend
-```bash
-Continue building
 ```
