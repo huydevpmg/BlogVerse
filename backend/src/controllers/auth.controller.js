@@ -1,8 +1,10 @@
-const User = require("../models/user.model");
+const User = require("../models/user.model.js");
 const generateVerificationCode = require("../utils/generateVerificationCode");
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
 const generateTokenAndSetCookies = require("../utils/generateTokenAndSetCookies");
+const bcrypt = require("bcryptjs");
+const cloudinary = require("../lib/cloudinary.js");
+
+
 const {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -11,58 +13,82 @@ const {
 } = require("../mailtrap/emails");
 
 const signup = async (req, res) => {
-  const { email, password, name, gender } = req.body;
-
+  const { fullName, email, password , gender} = req.body;
+  console.log(fullName, email, password , gender)
   try {
-    if (!email || !password || !name || !gender) {
-      throw new Error("All fields are required");
+    if (!fullName || !email || !password || !gender) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const userAlreadyExists = await User.findOne({ email });
-
-    if (userAlreadyExists) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.findOne({ email });
+    if (user) return res.status(400).json({ message: "Email already exists" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${fullName}`;
+    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${fullName}`;
     const verificationToken = generateVerificationCode();
 
-    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${name}`;
-    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${name}`;
-
-    const user = new User({
+    const newUser = new User({
+      fullName,
       email,
       password: hashedPassword,
-      name,
       gender,
       profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
       verificationToken,
       verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
     });
 
-    await user.save();
+    console.log(newUser)
+    if (newUser) {
+      // generate jwt token here
+      generateTokenAndSetCookies(res, newUser._id);
+      await sendVerificationEmail(newUser.email, verificationToken);
+      await newUser.save();
 
-    // jwt
-    const userID = user._id;
-
-    generateTokenAndSetCookies(res, userID);
-
-    await sendVerificationEmail(user.email, verificationToken);
-
-    res.status(201).json({
-      success: true,
-      message: "User created successfully",
-      user: {
-        ...user._doc,
-        password: undefined
-      }
-    });
+      res.status(201).json({
+        _id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        profilePic: newUser.profilePic,
+      });
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    }
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.log("Error in signup controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    const userId = req.user._id;
+
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile pic is required" });
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true }
+    );
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log("error in update profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const verifyEmail = async (req, res) => {
   const { code } = req.body;
   console.log(code);
@@ -83,7 +109,7 @@ const verifyEmail = async (req, res) => {
     user.verificationTokenExpiresAt = undefined;
     await user.save();
 
-    await sendWelcomeEmail(user.email, user.name);
+    await sendWelcomeEmail(user.email, user.fullName);
     res.status(200).json({
       success: true,
       message: "Email verified successfully",
@@ -96,38 +122,31 @@ const verifyEmail = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
-const signin = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid Credentials" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    generateTokenAndSetCookies(res, user._id);
-    user.lastLogin = new Date();
-    await user.save();
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    generateTokenAndSetCookies(res, user._id );
 
     res.status(200).json({
-      success: true,
-      message: "Logged in successfully",
-      user: {
-        ...user._doc,
-        password: undefined
-      }
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.log("Error in login controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -150,7 +169,7 @@ const forgotPassword = async (req, res) => {
     await sendPasswordResetEmail(
       user.email,
       `${process.env.CLIENT_URL}reset-password/${resetToken}`,
-      user.name
+      user.fullName
     );
     res.status(200).json({
       success: true,
@@ -184,7 +203,7 @@ const resetPassword = async (req, res) => {
     user.resetPasswordExpiresAt = undefined;
     await user.save();
 
-    await sendResetSuccessEmail(user.email, user.name);
+    await sendResetSuccessEmail(user.email, user.fullName);
     res
       .status(200)
       .json({ success: true, message: "Password reset successful" });
@@ -197,28 +216,22 @@ const logout = async (req, res) => {
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
-const checkAuth = async (req, res) => {
+const checkAuth = (req, res) => {
   try {
-    const user = req.user;
-    if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User not found" });
-    }
-
-    res.status(200).json({ success: true, user });
+    res.status(200).json(req.user);
   } catch (error) {
-    console.log("Error in checkAuth ", error);
-    res.status(400).json({ success: false, message: error.message });
+    console.log("Error in checkAuth controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 module.exports = {
   signup,
-  signin,
+  login,
   logout,
   verifyEmail,
   forgotPassword,
   resetPassword,
-  checkAuth
+  checkAuth,
+  updateProfile
 };

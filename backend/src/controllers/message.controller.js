@@ -1,70 +1,76 @@
-const Conversation = require("../models/conversation.model.js");
+
+const User = require("../models/user.model.js");
 const Message = require("../models/message.model.js");
+
 const { getReceiverSocketId, io } = require("../socket/socket.js");
+
 const sendMessage = async (req, res) => {
   try {
-    const { message } = req.body;
+    const { text, image } = req.body;
     const { id: receiverId } = req.params;
-    const senderId = req.user._id.toString();
+    const senderId = req.user._id;
 
-    let conversation = await Conversation.findOne({
-      //find include all these fields
-      participants: { $all: [senderId, receiverId] }
-    });
-
-    if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [senderId, receiverId]
-      });
+    let imageUrl;
+    if (image) {
+      // Upload base64 image to cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(image);
+      imageUrl = uploadResponse.secure_url;
     }
 
     const newMessage = new Message({
       senderId,
       receiverId,
-      message
+      text,
+      image: imageUrl,
     });
 
-    if (newMessage) {
-      conversation.messages.push(newMessage._id);
-    }
-
-    await Promise.all([conversation.save(), newMessage.save()]);
+    await newMessage.save();
 
     const receiverSocketId = getReceiverSocketId(receiverId);
-    console.log("Receiver Socket ID: ", receiverSocketId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
-    res.status(201).json({ message: "Message send successfully", newMessage });
+
+    res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sendMessage controller ", error.message);
+    console.log("Error in sendMessage controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-const getMessage = async (req, res) => {
+
+const getMessages = async (req, res) => {
   try {
-    const { id: userChatToId } = req.params;
-    const senderId = req.user._id.toString();
+    const { id: userToChatId } = req.params;
+    const myId = req.user._id;
 
-    const conversation = await Conversation.findOne({
-      participants: { $all: [senderId, userChatToId] }
-    }).populate("messages"); // NOT REFERENCE BUT ACTUAL MESSAGES
-
-    if (!conversation) {
-      return res.status(200).json([]); // Trả về phản hồi ngay lập tức nếu không tìm thấy cuộc trò chuyện
-    }
-
-    const messages = conversation.messages;
+    const messages = await Message.find({
+      $or: [
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
+      ],
+    });
 
     res.status(200).json(messages);
   } catch (error) {
-    console.log("Error in getMessage controller ", error.message);
+    console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
+const getUsersForSidebar = async (req, res) => {
+  try {
+    const loggedInUserId = req.user._id;
+    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+
+    res.status(200).json(filteredUsers);
+  } catch (error) {
+    console.error("Error in getUsersForSidebar: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 module.exports = {
+  getUsersForSidebar,
   sendMessage,
-  getMessage
+  getMessages
 };

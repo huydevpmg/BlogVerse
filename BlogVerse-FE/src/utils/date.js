@@ -25,3 +25,11 @@ export function extractTime(dateString) {
 function padZero(number) {
   return number.toString().padStart(2, "0");
 }
+
+export function formatMessageTime(date) {
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}

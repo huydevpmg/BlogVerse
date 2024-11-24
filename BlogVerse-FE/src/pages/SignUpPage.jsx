@@ -1,34 +1,55 @@
 import { motion } from "framer-motion";
-import Input from "../../components/Input";
 import { User, Mail, Lock, PersonStanding } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
-import { useAuthStore } from "../../store/AuthStore";
-import AuthLayout from "../../components/AuthLayout/AuthLayout";
-import Select from "./../../components/Select";
+import { toast } from "react-hot-toast";
+import Input from "../components/Input";
+import PasswordStrengthMeter from "./../components/PasswordStrengthMeter";
+import { useAuthStore } from "./../store/useAuthStore";
+import AuthLayout from "./../components/AuthLayout/AuthLayout";
+import Select from "./../components/Select";
 const SignUpPage = () => {
-  const [name, setName] = useState("");
-  const [mail, setMail] = useState("");
-  const [pass, setPassword] = useState("");
-  const [gender, setGender] = useState("");
+  // const [name, setName] = useState("");
+  // const [mail, setMail] = useState("");
+  // const [pass, setPassword] = useState("");
+  // const [gender, setGender] = useState("");
+  const [showPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    gender: "",
+  });
+
+  const { signup } = useAuthStore();
 
   const navigate = useNavigate();
   const [strength, setStrength] = useState(0);
 
-  const { signup, error } = useAuthStore();
+  const validateForm = () => {
+    if (!formData.fullName.trim()) return toast.error("Full name is required");
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email))
+      return toast.error("Invalid email format");
+    if (!formData.password) return toast.error("Password is required");
+    if (formData.password.length < 6)
+      return toast.error("Password must be at least 6 characters");
+
+    return true;
+  };
   const handleStrengthChange = (strength) => {
     setStrength(strength);
   };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
     try {
-      await signup(mail, pass, name, gender);
+      await signup(formData);
       navigate("/verify-email");
     } catch (error) {
-      console.log(error);
+      toast.error(error.response?.data?.message || "Sign up failed!"); // Hiển thị thông báo lỗi từ backend nếu có
     }
   };
 
@@ -67,37 +88,43 @@ const SignUpPage = () => {
                 icon={User}
                 type="text"
                 placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
               />
               <Input
                 icon={Mail}
                 type="text"
                 placeholder="Email"
-                value={mail}
-                onChange={(e) => setMail(e.target.value)}
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
               />
               <Input
                 icon={Lock}
-                type="password"
-                placeholder="Password"
-                value={pass}
-                onChange={(e) => setPassword(e.target.value)}
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
               />
               <Select
                 icon={PersonStanding}
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
+                value={formData.gender}
+                onChange={(e) =>
+                  setFormData({ ...formData, gender: e.target.value })
+                }
               />
-              {error && (
-                <p className="mt-2 font-semibold text-red-500">{error}</p>
-              )}
+
               <PasswordStrengthMeter
-                password={pass}
+                password={formData.password}
                 onStrengthChange={handleStrengthChange}
               />
               <motion.button
-                disabled={strength < 4}
+                disabled={strength < 4 && !validateForm}
                 className="font-blod focus:ring-offset-2f mt-5 w-full rounded-lg bg-gradient-to-r from-slate-600 to-sky-600 px-4 py-3 text-white shadow-lg transition duration-200 ease-in-out hover:from-slate-700 hover:to-sky-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-gray-600"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

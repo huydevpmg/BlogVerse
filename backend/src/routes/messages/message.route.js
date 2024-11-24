@@ -3,13 +3,12 @@ const messageRoute = express.Router();
 
 const {
   sendMessage,
-  getMessage
+  getMessages,
+  getUsersForSidebar,
 } = require("../../controllers/message.controller");
 const { verifyToken } = require("../../middleware/verifyToken");
 
-//require controller here
-
-messageRoute.get("/getMessage/:id", verifyToken, getMessage);
+messageRoute.get("/getMessage/:id", verifyToken, getMessages);
 messageRoute.post("/sendMessage/:id", verifyToken, sendMessage);
-
+messageRoute.get("/getUsersForSidebar", verifyToken, getUsersForSidebar); 
 module.exports = messageRoute;

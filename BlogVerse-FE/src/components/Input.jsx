@@ -1,10 +1,10 @@
-/* eslint-disable react/prop-types */
+import PropTypes from "prop-types";
 
 const Input = ({ icon: Icon, ...props }) => {
   return (
     <div className="relative mb-6">
       <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-        <Icon className="size-5 text-sky-300" />
+        {Icon && <Icon className="size-5 text-sky-300" />}
       </div>
       <input
         {...props}
@@ -12,6 +12,10 @@ const Input = ({ icon: Icon, ...props }) => {
       />
     </div>
   );
+};
+
+Input.propTypes = {
+  icon: PropTypes.elementType,
 };
 
 export default Input;

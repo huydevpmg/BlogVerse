@@ -1,107 +1,66 @@
-/* eslint-disable react/prop-types */
 import { Navigate, Route, Routes } from "react-router-dom";
-import SignUpPage from "./pages/SignUp/SignUpPage";
-import LoginPage from "./pages/Login/LoginPage";
 import { useEffect } from "react";
-import { useAuthStore } from "./store/AuthStore";
-// import DashboardPage from "./pages/Dashboard/DashboardPage";
 import EmailVerificationPage from "./pages/Verification/EmailVerificationPage";
 import ForgotPasswordPage from "./pages/Verification/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/Verification/ResetPasswordPage";
-import HomePage from "./pages/Home/HomePage";
 import { Toaster } from "react-hot-toast";
+import { useThemeStore } from "./store/useThemeStore";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import { useAuthStore } from "./store/useAuthStore";
+import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+import Navbar from "./components/NavBar";
+import { Loader } from "lucide-react";
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!user.isVerified) {
-    return <Navigate to="/verify-email" replace />;
-  }
-
-  return children;
-};
-
-const RedirectAuthenticatedUser = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
-
-  if (isAuthenticated && user.isVerified) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
 function App() {
-  const { checkAuth } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
+  const { theme } = useThemeStore();
+
+  console.log({ onlineUsers });
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
-  return (
-    <div>
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: "#333",
-            color: "#fff",
-          },
-        }}
-      />
+  console.log({ authUser });
 
+  if (isCheckingAuth && !authUser)
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
+
+  return (
+    <div data-theme={theme}>
+      {authUser && <Navbar />}
       <Routes>
         <Route
           path="/"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
+          element={authUser ? <HomePage /> : <Navigate to="/login" />}
         />
         <Route
           path="/signup"
-          element={
-            <RedirectAuthenticatedUser>
-              <SignUpPage />
-            </RedirectAuthenticatedUser>
-          }
+          element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
         />
         <Route
           path="/login"
-          element={
-            <RedirectAuthenticatedUser>
-              <LoginPage />
-            </RedirectAuthenticatedUser>
-          }
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+        />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route
+          path="/profile"
+          element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
         />
         <Route path="/verify-email" element={<EmailVerificationPage />} />
-        <Route
-          path="/forgot-password"
-          element={
-            <RedirectAuthenticatedUser>
-              <ForgotPasswordPage />
-            </RedirectAuthenticatedUser>
-          }
-        />
-
-        <Route
-          path="/reset-password/:token"
-          element={
-            <RedirectAuthenticatedUser>
-              <ResetPasswordPage />
-            </RedirectAuthenticatedUser>
-          }
-        />
-
-        {/* <Route path="/home-test" element={<HomePage />} /> */}
-        {/* catch all routes */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
+      <Toaster />
     </div>
   );
 }

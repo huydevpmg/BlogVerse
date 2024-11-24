@@ -1,29 +1,39 @@
-const http = require("http");
-const { initializeSocket } = require("./socket/socket");
-
-require("dotenv").config();
-const { mongoConnect } = require("./db/mongo");
-const { app, server } = require("./socket/socket");
-
-const PORT = process.env.PORT || 8000;
 const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
+const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
-const api = require("./routes/api");
-app.use(cookieParser()); // allows us to parse incoming cookies
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-// app.use(morgan('combined'));
+const cors = require("cors");
+const path = require("path");
+
+const { connectDB } = require("./db/mongo.js");
+const { app, server } = require("./socket/socket.js");
+const authRoutes = require("./routes/auth/auth.route.js");
+const messageRoutes = require("./routes/messages/message.route.js");
+dotenv.config();
+
+const PORT = process.env.PORT;
+// const __dirname = path.resolve();
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
-app.use("/v1", api);
+app.use("/api/auth", authRoutes);
+app.use("/api/message", messageRoutes);
 
-async function startServer() {
-  server.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}...`);
-  });
-  await mongoConnect();
-}
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-startServer();
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+//   });
+// }
+
+server.listen(PORT, () => {
+  console.log("server is running on PORT:" + PORT);
+  connectDB();
+});

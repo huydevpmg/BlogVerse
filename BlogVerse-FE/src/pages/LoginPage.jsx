@@ -1,19 +1,23 @@
 import { useState } from "react";
+import { useAuthStore } from "./../store/useAuthStore";
+import AuthLayout from "./../components/AuthLayout/AuthLayout";
 import { motion } from "framer-motion";
-import { Mail, Lock } from "lucide-react";
+import Input from "../components/Input";
 import { Link } from "react-router-dom";
-import Input from "./../../components/Input";
-import { useAuthStore } from "./../../store/AuthStore";
-import AuthLayout from "./../../components/AuthLayout/AuthLayout";
-const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
+import { Mail, Lock } from "lucide-react";
+
+const LoginPage = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
   const { login, error } = useAuthStore();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    await login(email, password);
+    await login(formData);
   };
 
   return (
@@ -34,17 +38,26 @@ const LoginPage = () => {
                 icon={Mail}
                 type="text"
                 placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
               />
 
               <Input
                 icon={Lock}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
               />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center pr-3"
+                onClick={() => setShowPassword(!showPassword)}
+              ></button>
               {error && (
                 <p className="mt-2 font-semibold text-red-500">{error}</p>
               )}
