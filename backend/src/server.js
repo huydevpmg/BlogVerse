@@ -17,9 +17,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
+    origin: ["http://localhost:5173", "http://192.168.0.4:5173"], // Nguồn gốc được phép
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,  })
 );
 
 app.use("/api/auth", authRoutes);

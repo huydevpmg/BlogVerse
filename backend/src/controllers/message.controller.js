@@ -1,7 +1,6 @@
-
 const User = require("../models/user.model.js");
 const Message = require("../models/message.model.js");
-
+const cloudinary = require("../lib/cloudinary.js");
 const { getReceiverSocketId, io } = require("../socket/socket.js");
 
 const sendMessage = async (req, res) => {
@@ -38,7 +37,6 @@ const sendMessage = async (req, res) => {
   }
 };
 
-
 const getMessages = async (req, res) => {
   try {
     const { id: userToChatId } = req.params;
@@ -61,7 +59,9 @@ const getMessages = async (req, res) => {
 const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+    const filteredUsers = await User.find({
+      _id: { $ne: loggedInUserId },
+    }).select("-password");
 
     res.status(200).json(filteredUsers);
   } catch (error) {
@@ -72,5 +72,5 @@ const getUsersForSidebar = async (req, res) => {
 module.exports = {
   getUsersForSidebar,
   sendMessage,
-  getMessages
+  getMessages,
 };

@@ -22,8 +22,8 @@ const Sidebar = () => {
   if (isUsersLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="flex h-full w-20 flex-col border-r border-base-300 transition-all duration-200 lg:w-72">
-      <div className="w-full border-b border-base-300 p-5">
+    <aside className="flex h-full w-20 flex-col border-r border-base-300 transition-all duration-200 lg:w-60 bg-gray-200">
+      <div className="w-full border-b-2 border-black p-5 bg-white">
         <div className="flex items-center gap-2">
           <Users className="size-6" />
           <span className="hidden font-medium lg:block">Contacts</span>
@@ -40,17 +40,17 @@ const Sidebar = () => {
             <span className="text-sm">Show online only</span>
           </label>
           <span className="text-xs text-zinc-500">
-            ({Array.isArray(onlineUsers) ? onlineUsers.length : 0} online)
+            ({Array.isArray(onlineUsers) ? onlineUsers.length - 1 : 0} online)
           </span>
         </div>
       </div>
 
-      <div className="w-full overflow-y-auto py-3">
+      <div className="w-full overflow-y-auto pb-3">
         {filteredUsers.map((user) => (
           <button
             key={user._id}
             onClick={() => setSelectedUser(user)}
-            className={`flex w-full items-center gap-3 p-3 transition-colors hover:bg-base-300 ${selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""} `}
+            className={`flex w-full items-center gap-3 p-3 transition-colors hover:bg-white ${selectedUser?._id === user._id ? "bg-white ring-1 border-y-0 border-black" : ""} `}
           >
             <div className="relative mx-auto lg:mx-0">
               <img

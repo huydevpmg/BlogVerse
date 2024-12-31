@@ -4,27 +4,22 @@ import EmailVerificationPage from "./pages/Verification/EmailVerificationPage";
 import ForgotPasswordPage from "./pages/Verification/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/Verification/ResetPasswordPage";
 import { Toaster } from "react-hot-toast";
-import { useThemeStore } from "./store/useThemeStore";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import { useAuthStore } from "./store/useAuthStore";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
-import SettingsPage from "./pages/SettingsPage";
 import Navbar from "./components/NavBar";
 import { Loader } from "lucide-react";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
-  const { theme } = useThemeStore();
 
   console.log({ onlineUsers });
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
-  console.log({ authUser });
 
   if (isCheckingAuth && !authUser)
     return (
@@ -34,7 +29,7 @@ function App() {
     );
 
   return (
-    <div data-theme={theme}>
+    <div>
       {authUser && <Navbar />}
       <Routes>
         <Route
@@ -49,7 +44,6 @@ function App() {
           path="/login"
           element={!authUser ? <LoginPage /> : <Navigate to="/" />}
         />
-        <Route path="/settings" element={<SettingsPage />} />
         <Route
           path="/profile"
           element={authUser ? <ProfilePage /> : <Navigate to="/login" />}

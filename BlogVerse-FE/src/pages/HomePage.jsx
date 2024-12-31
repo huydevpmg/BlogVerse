@@ -9,8 +9,8 @@ const HomePage = () => {
   return (
     <div className="h-screen bg-base-200">
       <div className="flex items-center justify-center px-4 pt-20">
-        <div className="shadow-cl h-[calc(100vh-8rem)] w-full max-w-6xl rounded-lg bg-base-100">
-          <div className="flex h-full overflow-hidden rounded-lg">
+        <div className="shadow-cl h-[calc(100vh-8rem)] w-full max-w-7xl rounded-2xl bg-base-100 mt-2">
+          <div className="flex h-full overflow-hidden rounded-lg mt" >
             <Sidebar />
 
             {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
