@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageCircleHeart, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
@@ -14,7 +14,7 @@ const Navbar = () => {
               to="/"
               className="flex items-center gap-2.5 transition-all hover:opacity-80"
             >
-              <h1 className="text-xl font-bold flex text-center items-center gap-1"><MessageCircleHeart className="size-7" />BLOGVERSE</h1>
+              <h1 className="text-xl font-bold flex text-center items-center gap-1">BLOGVERSE</h1>
             </Link>
           </div>
 

@@ -13,7 +13,7 @@ import Navbar from "./components/NavBar";
 import { Loader } from "lucide-react";
 
 function App() {
-  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
+  const { authUser, isLoggingIn, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
 
   console.log({ onlineUsers });
 
@@ -27,10 +27,11 @@ function App() {
         <Loader className="size-10 animate-spin" />
       </div>
     );
+      console.log(isLoggingIn)
 
   return (
     <div>
-      {authUser && <Navbar />}
+    {authUser &&  <Navbar />}
       <Routes>
         <Route
           path="/"
